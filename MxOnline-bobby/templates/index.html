@@ -85,7 +85,7 @@
 							<div class="unslider-arrow2 next"></div>
 						</div>
                             {% for course in courses %}
-                            <div class="module1_{{ forloop.counter|add:2 }} box">
+                            <div class="module1_{{ forloop.counter|add:2 }} box">        {# forloop.counter|add:2  循环自动加2#}
                                 <a href="{% url 'course:course_detail' course.id %}">
                                     <img width="233" height="190" src="{{ MEDIA_URL }}{{ course.image }}"/>
                                 </a>
@@ -120,7 +120,7 @@
 					<div class="right">
 						<ul>
                             {% for org in course_orgs %}
-                                <li class="{% if forloop.counter|divisibleby:5 %}five{% endif %}">
+                                <li class="{% if forloop.counter|divisibleby:5 %}five{% endif %}">     {# forloop.counter|divisibleby:5 如果他能被5整除 ，就显示five #}
                                     <a href="{% url 'org:org_home' org.id %}">
                                         <div class="company">
                                             <img width="184" height="100" src="{{ MEDIA_URL }}{{ org.image }}"/>

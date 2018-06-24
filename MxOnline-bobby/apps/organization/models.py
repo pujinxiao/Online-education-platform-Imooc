@@ -16,9 +16,8 @@ class CityDict(models.Model):
         verbose_name = u"城市"
         verbose_name_plural = verbose_name
 
-    def __unicode__(self):
+    def __unicode__(self):      # 重载 这样你在xadmin后台看到的就是相应的中文
         return self.name
-
 
 
 class CourseOrg(models.Model):
@@ -41,8 +40,8 @@ class CourseOrg(models.Model):
         verbose_name_plural = verbose_name
 
     def get_teacher_nums(self):
-        #获取课程机构的教师数量
-        return self.teacher_set.all().count()
+        # 获取课程机构的教师数量
+        return self.teacher_set.all().count()      # 她怎么知道是那个课程呢？ 只通过这个self传值的，你访问了那个课程机构，self就是那个课程
 
     def __unicode__(self):
         return self.name

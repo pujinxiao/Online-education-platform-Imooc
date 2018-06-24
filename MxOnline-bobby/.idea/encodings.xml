@@ -3,6 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/extra_apps/xadmin/plugins/excel.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/extra_apps/xadmin/templates/xadmin/excel/model_list.top_toolbar.import.html" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/运行说明.txt" charset="GBK" />
     <file url="PROJECT" charset="GBK" />
   </component>
 </project>

@@ -24,7 +24,7 @@
 				<div class="left">
 					<div class="picbox">
 						<div class="tb-booth tb-pic">
-							<img width="440" height="445" src="{{ MEDIA_URL }}{{ course.image }}" class="jqzoom" />
+							<img width="440" height="400" src="{{ MEDIA_URL }}{{ course.image }}" class="jqzoom" />
 						</div>
 
 					</div>
@@ -52,6 +52,11 @@
                                 <div class="buy btn"><a style="color: white" href="{% url 'course:course_info' course.id %}">开始学习</a></div>
 						</div>
 					</div>
+
+
+
+
+
                     <div class="group-share-box">
                         <div class="bdsharebuttonbox"
                              data-text="django开始了"
@@ -60,11 +65,12 @@
                              data-url="/group/groupdetail/15/">
                             <span class="fl">分享到：</span>
                             <a href="#" class="bds_more" data-cmd="more"></a>
-                            <a title="分享到QQ空间" href="#" class="bds_qzone" data-cmd="qzone"></a>
-                            <a title="分享到新浪微博" href="#" class="bds_tsina" data-cmd="tsina"></a>
-                            <a title="分享到腾讯微博" href="#" class="bds_tqq" data-cmd="tqq"></a>
-                            <a title="分享到人人网" href="#" class="bds_renren" data-cmd="renren"></a>
-                            <a title="分享到微信" href="#" class="bds_weixin" data-cmd="weixin"></a>
+                            {# 在这里可以填入实际的url，报读找相关的html就可以实现 #}
+                            <a title="分享到QQ空间" href="#" class="bds_qzone" data-cmd="qzone">QQ；</a>
+                            <a title="分享到新浪微博" href="#" class="bds_tsina" data-cmd="tsina">新浪微博；</a>
+                            <a title="分享到腾讯微博" href="#" class="bds_tqq" data-cmd="tqq">腾讯微博；</a>
+                            <a title="分享到人人网" href="#" class="bds_renren" data-cmd="renren">人人网；</a>
+                            <a title="分享到微信" href="#" class="bds_weixin" data-cmd="weixin">微信</a>
                         </div>
                     </div>
 				</div>

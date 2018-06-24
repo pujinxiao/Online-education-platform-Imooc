@@ -17,7 +17,7 @@ class CourseOrgAdmin(object):
     search_fields = ['name', 'desc', 'click_nums', 'fav_nums']
     list_filter = ['name', 'desc', 'click_nums', 'fav_nums']
     relfield_style = 'fk-ajax'
-    style_fields = {"desc":"ueditor"}
+    # style_fields = {"desc":"ueditor"}    # 富文本编辑器 xadmin中添加插件ueditor     编辑的时候好看点而已，可以注释掉
     model_icon = 'fa fa-university'
 
 

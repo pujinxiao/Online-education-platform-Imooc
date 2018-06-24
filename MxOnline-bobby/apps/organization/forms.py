@@ -13,7 +13,7 @@ class UserAskForm(forms.ModelForm):
         model = UserAsk
         fields = ['name', 'mobile', 'course_name']
 
-    def clean_mobile(self):
+    def clean_mobile(self):                          # 过滤字段的函数必须以clean开头
         """
         验证手机号码是否合法
         """

@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django.views.generic import View
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponse
+from django.http import HttpResponse     # 返回的是json  ajax操作
 from django.db.models import Q
 
 from .models import CourseOrg, CityDict, Teacher
@@ -10,6 +10,7 @@ from .forms import UserAskForm
 from operation.models import UserFavorite
 from courses.models import Course
 from utils.mixin_utils import LoginRequiredMixin
+from users.models import UserProfile
 # Create your views here.
 
 
@@ -18,40 +19,39 @@ class OrgView(View):
     课程机构列表功能
     """
     def get(self, request):
-        #课程机构
+        # 课程机构
         all_orgs = CourseOrg.objects.all()
-        hot_orgs = all_orgs.order_by("-click_nums")[:3]
+        hot_orgs = all_orgs.order_by("-click_nums")[:3]                 # 热门机构的前三个提取
 
-        #城市
+        # 城市
         all_citys = CityDict.objects.all()
 
-        #机构搜索
+        # 机构搜索
         search_keywords = request.GET.get('keywords', "")
         if search_keywords:
-            all_orgs = all_orgs.filter(Q(name__icontains=search_keywords)|Q(desc__icontains=search_keywords))
+            all_orgs = all_orgs.filter(Q(name__icontains=search_keywords) |
+                                       Q(desc__icontains=search_keywords))
 
-        #取出筛选城市
+        # 取出筛选城市
         city_id = request.GET.get('city', "")
         if city_id:
             all_orgs = all_orgs.filter(city_id=int(city_id))
 
-        #类别筛选
+        # 类别筛选
         category = request.GET.get('ct', "")
         if category:
-            all_orgs = all_orgs.filter(category=category)\
+            all_orgs = all_orgs.filter(category=category)
 
         sort = request.GET.get('sort', "")
         if sort:
             if sort == "students":
-                all_orgs = all_orgs.order_by("-students")
+                all_orgs = all_orgs.order_by("-students")         # 根据学生来倒序
             elif sort == "courses":
                 all_orgs = all_orgs.order_by("-course_nums")
 
+        org_nums = all_orgs.count()                          # count()函数直接是统计机构数据库的个数
 
-        org_nums = all_orgs.count()
-
-
-        #对课程机构进行分页
+        # 对课程机构进行分页
         try:
             page = request.GET.get('page', 1)
         except PageNotAnInteger:
@@ -78,10 +78,16 @@ class AddUserAskView(View):
     def post(self, request):
         userask_form = UserAskForm(request.POST)
         if userask_form.is_valid():
-            user_ask = userask_form.save(commit=True)
-            return HttpResponse('{"status":"success"}', content_type='application/json')
+            user_ask = userask_form.save(commit=True)                                        # 这里的moduleform多了一个功能：保存
+            return HttpResponse('{"status":"success"}', content_type='application/json')     # 这里是ajax的提交,,js实现的
         else:
-            return HttpResponse('{"status":"fail", "msg":"添加出错"}', content_type='application/json')
+            # msg = ''
+            # msg_error = userask_form.errors
+            # for k, v in msg_error.items():
+            #     msg = msg + k + ":" + ''.join(v) + '\n'
+            # msg = msg.encode('utf-8')
+            # return HttpResponse('{"status":"fail", "msg":%s}' % msg, content_type='application/json')
+            return HttpResponse('{"status":"fail", "msg":"填写出错"}', content_type='application/json')
 
 class OrgHomeView(View):
     """
@@ -90,6 +96,7 @@ class OrgHomeView(View):
     def get(self, request, org_id):
         current_page = "home"
         course_org = CourseOrg.objects.get(id=int(org_id))
+        # UserProfile.objects.all()
         course_org.click_nums += 1
         course_org.save()
         has_fav = False
@@ -97,14 +104,14 @@ class OrgHomeView(View):
             if UserFavorite.objects.filter(user=request.user, fav_id=course_org.id, fav_type=2):
                 has_fav = True
 
-        all_courses = course_org.course_set.all()[:3]
-        all_teachers = course_org.teacher_set.all()[:1]
+        all_courses = course_org.course_set.all()                    # course_set.all() 是取出这个机构下全部的coure，类名转小写然后加_set
+        all_teachers = course_org.teacher_set.all()
         return render(request, 'org-detail-homepage.html', {
             'all_courses':all_courses,
             'all_teachers': all_teachers,
             'course_org':course_org,
             'current_page':current_page,
-            'has_fav':has_fav
+            'has_fav':has_fav,
         })
 
 
@@ -158,12 +165,12 @@ class OrgTeacherView(View):
             if UserFavorite.objects.filter(user=request.user, fav_id=course_org.id, fav_type=2):
                 has_fav = True
         all_teachers = course_org.teacher_set.all()
-        return render(request, 'org-detail-teachers.html', {
-            'all_teachers':all_teachers,
-            'course_org':course_org,
-            'current_page':current_page,
-            'has_fav':has_fav
 
+        return render(request, 'org-detail-teachers.html', {
+            'all_teachers': all_teachers,
+            'course_org': course_org,
+            'current_page': current_page,        # 这里传出去的变量不只是向下传递，还会向上传递，即传到base.html里面，可以使用该变量
+            'has_fav': has_fav,
         })
 
 
@@ -175,13 +182,13 @@ class AddFavView(View):
         fav_id = request.POST.get('fav_id', 0)
         fav_type = request.POST.get('fav_type', 0)
 
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated():                       # 固定的用法，函数调用is_authenticated()
             #判断用户登录状态
             return HttpResponse('{"status":"fail", "msg":"用户未登录"}', content_type='application/json')
 
         exist_records = UserFavorite.objects.filter(user=request.user, fav_id=int(fav_id), fav_type=int(fav_type))
         if exist_records:
-            #如果记录已经存在， 则表示用户取消收藏
+            # 如果记录已经存在， 则表示用户取消收藏
             exist_records.delete()
             if int(fav_type) == 1:
                 course = Course.objects.get(id=int(fav_id))
@@ -235,11 +242,11 @@ class TeacherListView(View):
     def get(self, request):
         all_teachers = Teacher.objects.all()
 
-        #课程讲师搜索
+        # 讲师搜索
         search_keywords = request.GET.get('keywords', "")
         if search_keywords:
-            all_teachers = all_teachers.filter(Q(name__icontains=search_keywords)|
-                                               Q(work_company__icontains=search_keywords)|
+            all_teachers = all_teachers.filter(Q(name__icontains=search_keywords) |
+                                               Q(work_company__icontains=search_keywords) |
                                                Q(work_position__icontains=search_keywords))
 
         sort = request.GET.get('sort', "")
@@ -249,7 +256,7 @@ class TeacherListView(View):
 
         sorted_teacher = Teacher.objects.all().order_by("-click_nums")[:3]
 
-        #对讲师进行分页
+        # 对讲师进行分页
         try:
             page = request.GET.get('page', 1)
         except PageNotAnInteger:
@@ -258,15 +265,17 @@ class TeacherListView(View):
         p = Paginator(all_teachers, 1, request=request)
 
         teachers = p.page(page)
+        all_teachers_nums = all_teachers.count()               # 动态的显示讲师搜索出来的数量
         return render(request, "teachers-list.html", {
-            "all_teachers":teachers,
-            "sorted_teacher":sorted_teacher,
-            "sort":sort,
+            "all_teachers": teachers,
+            "sorted_teacher": sorted_teacher,
+            "sort": sort,
+            'teachers_nums': all_teachers_nums
         })
 
 
 class TeacherDetailView(View):
-    def get(self, request, teacher_id):
+    def get(self, request, teacher_id):           # teacher_id和urls.py中对应的参数名要一样
         teacher = Teacher.objects.get(id=int(teacher_id))
         teacher.click_nums += 1
         teacher.save()
@@ -282,7 +291,7 @@ class TeacherDetailView(View):
             if UserFavorite.objects.filter(user=request.user, fav_type=2, fav_id=teacher.org.id):
                 has_org_faved = True
 
-        #讲师排行
+        # 讲师排行
         sorted_teacher = Teacher.objects.all().order_by("-click_nums")[:3]
         return render(request, "teacher-detail.html", {
             "teacher":teacher,

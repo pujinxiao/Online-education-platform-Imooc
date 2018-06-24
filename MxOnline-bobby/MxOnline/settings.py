@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for MxOnline project.
 
@@ -32,7 +33,7 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 AUTHENTICATION_BACKENDS = (
-    'users.views.CustomBackend',
+    'users.views.CustomBackend',    # 自定义auth的认证，使得也可以通过邮箱登录
 )
 
 
@@ -50,7 +51,7 @@ INSTALLED_APPS = [
     'xadmin',
     'crispy_forms',
     'captcha',
-    'pure_pagination',
+    'pure_pagination',    # 分页功能
     'DjangoUeditor',
 ]
 AUTH_USER_MODEL = "users.UserProfile"
@@ -80,7 +81,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.media',
+                'django.core.context_processors.media',                       # 在html中直接使用此变量MEDIA_URL，需要加这一行
             ],
         },
     },
@@ -97,7 +98,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': "mxonline",
         'USER': 'root',
-        'PASSWORD': "root",
+        'PASSWORD': "123456",
         'HOST': "127.0.0.1"
     }
 }
@@ -138,22 +139,25 @@ USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
-
+""" 如果不是在debug模式下 不会自动加载以下文件目录的 """
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 
-EMAIL_HOST = "smtp.sina.com"
+# 邮件发送的配置
+EMAIL_HOST = "smtp.163.com"                     # 发送邮箱的域名
 EMAIL_PORT = 25
-EMAIL_HOST_USER = "projectsedu@sina.com"
-EMAIL_HOST_PASSWORD = "admin123"
-EMAIL_USE_TLS= False
-EMAIL_FROM = "projectsedu@sina.com"
+EMAIL_HOST_USER = "jinxiao_pu@163.com"
+EMAIL_HOST_PASSWORD = "pjx874907595"
+EMAIL_USE_TLS = False
+EMAIL_FROM = "jinxiao_pu@163.com"
 
+
+# 存入的文件会放到相应的目录      资源文件的配置
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')    # 这边只能join一个
 
 
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')    # 如果是在真实环境下就要去掉这个注释
 

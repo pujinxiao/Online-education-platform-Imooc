@@ -52,7 +52,7 @@
 
 					</div>
                     <div class="pageturn">
-                        <ul class="pagelist">
+                        <ul class="pagelist">      {# 这里的分页的html代码基本都是固定的，可以重复利用 #}
                             {% if all_courses.has_previous %}
                                 <li class="long"><a href="?{{ all_courses.previous_page_number.querystring }}">上一页</a></li>
                             {% endif %}
@@ -89,7 +89,7 @@
 						</dt>
 						<dd>
 							<a target="_blank" href="{{ ecmall_ad.url }}"><h2> {{ hot_course.name }}</h2></a>
-							<span class="fl">难度：<i class="key">{{ hot_course.get_degree_display }}</i></span>
+							<span class="fl">难度：<i class="key">{{ hot_course.get_degree_display }}</i></span>  {# 因为degree是CharField类型，，.get_degree_display 就可以显示自己定义的名称，中间的degree是定义的字段其他不变 #}
 						</dd>
 					</dl>
                     {% endfor %}

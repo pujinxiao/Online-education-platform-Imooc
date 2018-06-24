@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
-{% load staticfiles %}
+{% load staticfiles %}    {# 要利用另外的一种href的链接 如果是静态文件，既要把这个koad起来 #}
 <head>
 	<meta charset="UTF-8">
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" >
-	<title>{% block title %}慕学在线首页{% endblock %}</title>
+	<title>{% block title %}慕学在线首页{% endblock %}</title>                       {# base.html是父模版，默认title是慕学在线首页，，block希望子模版来重写他或者是继承他 #}
 	<link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}">
 	<link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
 	<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    {% block custom_css %}{% endblock %}
+    {% block custom_css %}{% endblock %}                                           {# 既可以继承上面的css样式，也可以添加新的样式    js也是同样的道理#}
     <script src="{% static 'js/jquery.min.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/jquery-migrate-1.2.1.min.js' %}" type="text/javascript"></script>
 
@@ -19,11 +19,11 @@
     <header>
 		<div  class=" header">
  			<div class="top">
-				<div class="wp">
-					<div class="fl"><p>服务电话：<b>33333333</b></p></div>
+                <div class="wp">
+					<div class="fl"><p>服务电话：<b>15432422342</b></p></div>
 					<!--登录后跳转-->
 
-                        {% if request.user.is_authenticated %}
+                    {% if request.user.is_authenticated %}       {# 判断是否登陆 #}
                         <div class="personal">
                             <dl class="user fr">
                                 <dd>{{ user.username }}<img class="down fr" src="{% static "/static/images/top_down.png" %}"/></dd>
@@ -50,7 +50,6 @@
                         <a style="color:white" class="fr registerbtn" href="{% url 'register' %}">注册</a>
                         <a style="color:white" class="fr loginbtn" href="{% url 'login' %}">登录</a>
                     {% endif %}
-
 
 				</div>
 			</div>
@@ -81,7 +80,7 @@
 					<div class="wp">
 						<ul>
 							<li {% if request.path == '/' %}class="active" {% endif %}><a href="{% url 'index' %}">首页</a></li>
-							<li {% if request.path|slice:'7' == '/course' %}class="active"{% endif %}>
+							<li {% if request.path|slice:'7' == '/course' %}class="active"{% endif %}>      {# request.path|slice:'7' 取前七个字符串，/也是算一个 django提供的函数 #}
 								<a href="{% url 'course:course_list' %}">
 									公开课<img class="hot" src="{% static 'images/nav_hot.png' %}">
 								</a>
@@ -99,7 +98,7 @@
     </header>
 </section>
 <!--crumbs start-->
-{% block custom_bread %}
+{% block custom_bread %}                   {# 面包屑 进入什么类别这里会有变动 所以要block下#}
 <section>
 	<div class="wp">
 		<ul  class="crumbs">

@@ -2,12 +2,12 @@
 import  json
 
 from django.shortcuts import render
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout   # 检验账号和密码是否正确   login, logout 都是django自己提供的登录和登出
 from django.contrib.auth.backends import ModelBackend
-from django.db.models import Q
-from django.views.generic.base import View
-from django.contrib.auth.hashers import make_password
-from django.http import HttpResponse, HttpResponseRedirect
+from django.db.models import Q                                # 并集
+from django.views.generic.base import View                    # 以后本来要书写的函数，都可以创建类来做，可用于重写get、post函数
+from django.contrib.auth.hashers import make_password         # 对密码明文加密
+from django.http import HttpResponse, HttpResponseRedirect    # 重定向的http
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 
@@ -22,49 +22,52 @@ from courses.models import Course
 from .models import Banner
 
 
-class CustomBackend(ModelBackend):
-    def authenticate(self, username=None, password=None, **kwargs):
+class CustomBackend(ModelBackend):   # 自定义登录的逻辑
+    def authenticate(self, username=None, password=None, **kwargs):   # 自定义auth的函数，可以同时加上邮箱作为name也能登录
         try:
-            user = UserProfile.objects.get(Q(username=username)|Q(email=username))
+            user = UserProfile.objects.get(Q(username=username)|Q(email=username))     # 如果用户名是对应的邮箱也可以登录
             if user.check_password(password):
                 return user
         except Exception as e:
             return None
 
+
 class AciveUserView(View):
-    def get(self, request, active_code):
-        all_records = EmailVerifyRecord.objects.filter(code=active_code)
-        if all_records:
+    '''验证邮箱激活地址'''
+    def get(self, request, active_code):                                    # 提取出get url中active_code 看urls.py的正则即可
+        all_records = EmailVerifyRecord.objects.filter(code=active_code)    # 查询次active_code 在EmailVerifyRecord是否存在
+        if all_records:                                                     # 把在 EmailVerifyRecord 表中的is_active字段设置为True，就说明激活成功
             for record in all_records:
                 email = record.email
                 user = UserProfile.objects.get(email=email)
                 user.is_active = True
                 user.save()
-        else:
+        else:                                                               # 如果是不存在的激活链接，跳转到链接失败页面
             return render(request, "active_fail.html")
         return render(request, "login.html")
 
 
 class RegisterView(View):
+    '''注册'''
     def get(self, request):
-        register_form = RegisterForm()
-        return render(request, "register.html", {'register_form':register_form})
+        register_form = RegisterForm()                                          # 实例化 注册的form
+        return render(request, "register.html", {'register_form': register_form})
 
     def post(self, request):
         register_form = RegisterForm(request.POST)
         if register_form.is_valid():
             user_name = request.POST.get("email", "")
-            if UserProfile.objects.filter(email=user_name):
-                return render(request, "register.html", {"register_form":register_form, "msg":"用户已经存在"})
+            if UserProfile.objects.filter(email=user_name):                            # 用户已经存在
+                return render(request, "register.html", {"register_form": register_form, "msg": "用户已经存在"})
             pass_word = request.POST.get("password", "")
-            user_profile = UserProfile()
+            user_profile = UserProfile()                            # 如果用的是moduleform 就不要实例化了
             user_profile.username = user_name
             user_profile.email = user_name
-            user_profile.is_active = False
-            user_profile.password = make_password(pass_word)
-            user_profile.save()
+            user_profile.is_active = False                         # 是否激活
+            user_profile.password = make_password(pass_word)         # 对密码明文加密
+            user_profile.save()                                      # 数据保存
 
-            #写入欢迎注册消息
+            # 写入欢迎注册消息
             user_message = UserMessage()
             user_message.user = user_profile.id
             user_message.message = "欢迎注册慕学在线网"
@@ -81,22 +84,23 @@ class LogoutView(View):
     用户登出
     """
     def get(self, request):
-        logout(request)
+        logout(request)                                                                 # 调用django的logout
         return HttpResponseRedirect(reverse("index"))
+
 
 class LoginView(View):
     def get(self, request):
         return render(request, "login.html", {})
     def post(self, request):
-        login_form = LoginForm(request.POST)
-        if login_form.is_valid():
+        login_form = LoginForm(request.POST)                    # 实例化这个登录的form          # 他会把input中name属性名传到form中去做验证， 初步判断是否正确，比如用户为空的时候，密码太短的时候
+        if login_form.is_valid():                                         # 这一步是判断是否通过验证 pjx
             user_name = request.POST.get("username", "")
             pass_word = request.POST.get("password", "")
-            user = authenticate(username=user_name, password=pass_word)
+            user = authenticate(username=user_name, password=pass_word)        # 验证正确就是一个对象，验证错误会返回None
             if user is not None:
                 if user.is_active:
-                    login(request, user)
-                    return HttpResponseRedirect(reverse("index"))
+                    login(request, user)                                         # 这一步是真正登录的动作
+                    return HttpResponseRedirect(reverse("index"))                # 重定向  如果还是render出去的话加载不出数据，没有传dict，但是reverse就可以重定向到index.html
                 else:
                     return render(request, "login.html", {"msg":"用户未激活！"})
             else:
@@ -106,6 +110,7 @@ class LoginView(View):
 
 
 class ForgetPwdView(View):
+    '''忘记密码'''
     def get(self, request):
         forget_form = ForgetForm()
         return render(request, "forgetpwd.html", {"forget_form":forget_form})
@@ -121,12 +126,13 @@ class ForgetPwdView(View):
 
 
 class ResetView(View):
+    '''重置密码链接的接口'''
     def get(self, request, active_code):
         all_records = EmailVerifyRecord.objects.filter(code=active_code)
         if all_records:
             for record in all_records:
                 email = record.email
-                return render(request, "password_reset.html", {"email":email})
+                return render(request, "password_reset.html", {"email": email})
         else:
             return render(request, "active_fail.html")
         return render(request, "login.html")
@@ -158,10 +164,11 @@ class UserinfoView(LoginRequiredMixin, View):
     用户个人信息
     """
     def get(self, request):
-        return render(request, 'usercenter-info.html', {})
+        current_page = "MyInfo"
+        return render(request, 'usercenter-info.html', {"current_page": current_page})
 
     def post(self, request):
-        user_info_form = UserInfoForm(request.POST, instance=request.user)
+        user_info_form = UserInfoForm(request.POST, instance=request.user)    # instance 直接post修改
         if user_info_form.is_valid():
             user_info_form.save()
             return HttpResponse('{"status":"success"}', content_type='application/json')
@@ -176,7 +183,7 @@ class UploadImageView(LoginRequiredMixin, View):
     用户修改头像
     """
     def post(self, request):
-        image_form = UploadImageForm(request.POST, request.FILES, instance=request.user)
+        image_form = UploadImageForm(request.POST, request.FILES, instance=request.user)    # module类的form 文件传过来的时候一定是要有request.FILES参数    instance参数，直接替换image，但还没有保存，保存要后面的save来执行
         if image_form.is_valid():
             image_form.save()
             return HttpResponse('{"status":"success"}', content_type='application/json')
@@ -205,7 +212,7 @@ class UpdatePwdView(View):
             return HttpResponse(json.dumps(modify_form.errors), content_type='application/json')
 
 
-class SendEmailCodeView(LoginRequiredMixin, View):
+class SendEmailCodeView(LoginRequiredMixin, View):          # 继承必须是登陆过的class
     """
     发送邮箱验证码
     """
@@ -219,7 +226,7 @@ class SendEmailCodeView(LoginRequiredMixin, View):
         return HttpResponse('{"status":"success"}', content_type='application/json')
 
 
-class UpdateEmailView(LoginRequiredMixin, View):
+class UpdateEmailView(LoginRequiredMixin, View):    # 继承必须是登陆过的class
     """
     修改个人邮箱
     """
@@ -242,9 +249,11 @@ class MyCourseView(LoginRequiredMixin, View):
     我的课程
     """
     def get(self, request):
+        current_page = 'MyCourse'
         user_courses = UserCourse.objects.filter(user=request.user)
         return render(request, 'usercenter-mycourse.html', {
-            "user_courses":user_courses
+            "user_courses": user_courses,
+            "current_page": current_page
         })
 
 
@@ -253,6 +262,7 @@ class MyFavOrgView(LoginRequiredMixin, View):
     我收藏的课程机构
     """
     def get(self, request):
+        current_page = 'MyFavOrg'
         org_list = []
         fav_orgs = UserFavorite.objects.filter(user=request.user, fav_type=2)
         for fav_org in fav_orgs:
@@ -260,7 +270,8 @@ class MyFavOrgView(LoginRequiredMixin, View):
             org = CourseOrg.objects.get(id=org_id)
             org_list.append(org)
         return render(request, 'usercenter-fav-org.html', {
-            "org_list":org_list
+            "org_list": org_list,
+            "current_page": current_page
         })
 
 
@@ -301,15 +312,16 @@ class MymessageView(LoginRequiredMixin, View):
     我的消息
     """
     def get(self, request):
+        current_page = "MyMessage"
         all_messages = UserMessage.objects.filter(user=request.user.id)
 
-        #用户进入个人消息后清空未读消息的记录
-        all_unread_messages = UserMessage.objects.filter(user=request.user.id, has_read=False)
+        # 用户进入个人消息后清空未读消息的记录
+        all_unread_messages = UserMessage.objects.filter(user=request.user.id, has_read=False)   # 清空自己的消息
         for unread_message in all_unread_messages:
             unread_message.has_read = True
             unread_message.save()
 
-        #对个人消息进行分页
+        # 对个人消息进行分页
         try:
             page = request.GET.get('page', 1)
         except PageNotAnInteger:
@@ -319,35 +331,38 @@ class MymessageView(LoginRequiredMixin, View):
 
         messages = p.page(page)
         return render(request, 'usercenter-message.html', {
-            "messages":messages
+            "messages": messages,
+            "current_page": current_page
         })
 
 
 class IndexView(View):
-    #慕学在线网 首页
+    # 慕学在线网 首页
     def get(self, request):
-        #取出轮播图
+        # 取出轮播图
         all_banners = Banner.objects.all().order_by('index')
         courses = Course.objects.filter(is_banner=False)[:6]
         banner_courses = Course.objects.filter(is_banner=True)[:3]
         course_orgs = CourseOrg.objects.all()[:15]
         return render(request, 'index.html', {
-            'all_banners':all_banners,
-            'courses':courses,
-            'banner_courses':banner_courses,
-            'course_orgs':course_orgs
+            'all_banners': all_banners,
+            'courses': courses,
+            'banner_courses': banner_courses,
+            'course_orgs': course_orgs
         })
 
 
+# 404 和 500 在调试环境中还是很重要的
 def page_not_found(request):
-    #全局404处理函数
+    # 全局404处理函数
     from django.shortcuts import render_to_response
     response = render_to_response('404.html', {})
     response.status_code = 404
     return response
 
+
 def page_error(request):
-    #全局500处理函数
+    # 全局500处理函数
     from django.shortcuts import render_to_response
     response = render_to_response('500.html', {})
     response.status_code = 500

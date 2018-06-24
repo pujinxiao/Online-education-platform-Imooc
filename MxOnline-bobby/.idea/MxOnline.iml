@@ -7,6 +7,7 @@
         <option name="settingsModule" value="MxOnline/settings.py" />
         <option name="manageScript" value="manage.py" />
         <option name="environment" value="&lt;map/&gt;" />
+        <option name="commandsToSkip" value="" />
       </configuration>
     </facet>
   </component>
@@ -15,7 +16,7 @@
       <sourceFolder url="file://$MODULE_DIR$/apps" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/extra_apps" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 2.7.11 virtualenv at E:\virtualevn\mxonline" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 2.7.13 virtualenv at F:\hs\virtualenv20180331" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TemplatesService">

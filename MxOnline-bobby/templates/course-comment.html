@@ -212,7 +212,7 @@
             data:{'course_id':{{ course.id }}, 'comments':comments},
             async: true,
             beforeSend:function(xhr, settings){
-                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");   {# csrftoken 一定要添加 #}
             },
             success: function(data) {
                 if(data.status == 'fail'){

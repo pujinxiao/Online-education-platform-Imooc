@@ -10,7 +10,7 @@ from organization.models import CourseOrg, Teacher
 
 
 class Course(models.Model):
-    course_org = models.ForeignKey(CourseOrg, verbose_name=u"课程机构", null=True, blank=True)
+    course_org = models.ForeignKey(CourseOrg, verbose_name=u"课程机构", null=True, blank=True)    # 外键
     name = models.CharField(max_length=50, verbose_name=u"课程名")
     desc = models.CharField(max_length=300, verbose_name=u"课程描述")
     detail = UEditorField(verbose_name=u"课程详情",width=600, height=300, imagePath="courses/ueditor/",
@@ -24,7 +24,7 @@ class Course(models.Model):
     image = models.ImageField(upload_to="courses/%Y/%m", verbose_name=u"封面图", max_length=100)
     click_nums = models.IntegerField(default=0, verbose_name=u"点击数")
     category = models.CharField(default=u"后端开发", max_length=20, verbose_name=u"课程类别")
-    tag = models.CharField(default="", verbose_name=u"课程标签", max_length=10)
+    tag = models.CharField(default="", verbose_name=u"课程标签", max_length=10)               #
     youneed_know = models.CharField(default="", max_length=300, verbose_name=u"课程须知")
     teacher_tell = models.CharField(default="", max_length=300, verbose_name=u"老师告诉你")
 
@@ -35,8 +35,8 @@ class Course(models.Model):
         verbose_name_plural = verbose_name
 
     def get_zj_nums(self):
-        #获取课程章节数
-        return self.lesson_set.all().count()
+        # 获取课程章节数
+        return self.lesson_set.all().count()            # lesson_set.all() 会把Lesson类中全部的记录以集合的方式返回，然后只要count一下就可以统计lesson数了
     get_zj_nums.short_description = "章节数"
 
     def go_to(self):
@@ -44,11 +44,11 @@ class Course(models.Model):
         return mark_safe("<a href='http://www.projectsedu.com'>跳转</>")
     go_to.short_description = "跳转"
 
-    def get_learn_users(self):
+    def get_learn_users(self):                         # 或个
         return self.usercourse_set.all()[:5]
 
     def get_course_lesson(self):
-        #获取课程所有章节
+        # 获取课程所有章节
         return self.lesson_set.all()
 
     def __unicode__(self):
@@ -76,8 +76,9 @@ class Lesson(models.Model):
         return self.name
 
     def get_lesson_video(self):
-        #获取章节视频
+        # 获取章节视频
         return self.video_set.all()
+
 
 class Video(models.Model):
     lesson = models.ForeignKey(Lesson, verbose_name=u"章节")
